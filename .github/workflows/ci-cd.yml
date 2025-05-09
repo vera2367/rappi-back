@@ -55,8 +55,8 @@ jobs:
 
       - name: 🧪 Run Postman tests
         run: |
-          newman run postman/mi_coleccion.postman_collection.json \
-            --environment postman/mi_entorno.postman_environment.json \
+          newman run postman/MetodoPago Copy 2.postman_collection.json \
+            --environment postman/apirappi.postman_environment.json \
             --reporters cli,junit \
             --reporter-junit-export newman-report.xml
 
@@ -76,6 +76,6 @@ jobs:
         with:
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
           heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
-          heroku_email: tu-correo@ejemplo.com
+          heroku_email: ${{ secrets.HEROKU_EMAIL }}
           usedocker: false
           procfile: "Procfile"
