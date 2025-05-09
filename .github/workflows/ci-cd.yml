@@ -24,7 +24,7 @@ jobs:
           --health-cmd="mysqladmin ping --silent"
           --health-interval=10s
           --health-timeout=5s
-          --health-retries=5
+          --health-retries=10
 
     steps:
       - name: 🧾 Checkout code
@@ -37,13 +37,36 @@ jobs:
           distribution: 'temurin'
 
       - name: 🛠️ Build with Gradle (sin tests)
-        run: ./gradlew build -x test
+        run: ./gradlew clean build -x test
 
-      - name: 🕐 Esperar que MySQL esté listo
+      - name: Esperar que MySQL esté listo
         run: |
-          until mysql -h 127.0.0.1 -u root -psoylucas -e 'SHOW DATABASES'; do
-            echo "Esperando MySQL..."
-            sleep 5
+          for i in {1..10}; do
+            if mysql -h 127.0.0.1 -P 3306 -u root -psoylucas -e "SHOW DATABASES"; then
+              echo "MySQL listo"
+              break
+            else
+              echo "Esperando MySQL..."
+              sleep 5
+            fi
+          done
+
+      - name: ▶️ Run Spring Boot app
+        run: |
+          nohup java -jar build/libs/*.jar > output.log 2>&1 &
+          echo $! > app.pid
+          sleep 20
+
+      - name: Verificar si Spring Boot está levantado
+        run: |
+          for i in {1..10}; do
+            if curl -s http://localhost:8080/actuator/health | grep '"status":"UP"'; then
+              echo "Aplicación levantada correctamente"
+              break
+            else
+              echo "Esperando que Spring Boot esté listo..."
+              sleep 5
+            fi
           done
 
       - name: 🧰 Setup Node.js (for Newman)
@@ -56,10 +79,20 @@ jobs:
 
       - name: 🧪 Run Postman tests
         run: |
-          newman run "postman2/MetodoPago Copy 2.postman_collection.json" \
-            --environment "postman2/apirappi.postman_environment.json" \
+          newman run postman2/MetodoPago.postman_collection.json \
+            --environment postman2/apirappi.postman_environment.json \
             --reporters cli,junit \
             --reporter-junit-export newman-report.xml
+
+      - name: 🛑 Stop Spring Boot app
+        run: |
+          kill $(cat app.pid)
+
+      - name: 📂 Upload JAR as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: spring-boot-app
+          path: build/libs/*.jar
 
       - name: 🚀 Deploy to Heroku
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
