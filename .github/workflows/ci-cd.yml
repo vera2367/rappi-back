@@ -46,19 +46,6 @@ jobs:
             sleep 5
           done
 
-      - name: ▶️ Run Spring Boot app in background
-        run: |
-          nohup java -Dserver.port=8080 -jar build/libs/*.jar > output.log 2>&1 &
-          echo $! > app.pid
-          sleep 20
-
-      - name: 🔍 Verificar si Spring Boot está levantado
-        run: |
-          until curl -s http://localhost:8080/actuator/health | grep UP; do
-            echo "Esperando que la aplicación esté lista..."
-            sleep 5
-          done
-
       - name: 🧰 Setup Node.js (for Newman)
         uses: actions/setup-node@v3
         with:
@@ -73,16 +60,6 @@ jobs:
             --environment "postman2/apirappi.postman_environment.json" \
             --reporters cli,junit \
             --reporter-junit-export newman-report.xml
-
-      - name: 🛑 Stop Spring Boot app
-        run: |
-          kill $(cat app.pid)
-
-      - name: 📂 Upload JAR as artifact
-        uses: actions/upload-artifact@v3.1.3
-        with:
-          name: spring-boot-app
-          path: build/libs/*.jar
 
       - name: 🚀 Deploy to Heroku
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
