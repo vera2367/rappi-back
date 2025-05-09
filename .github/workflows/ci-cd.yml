@@ -79,11 +79,7 @@ jobs:
           kill $(cat app.pid)
 
       - name: 📂 Upload JAR as artifact
-        if: success()  # Solo sube si todo fue exitoso
-        uses: actions/upload-artifact@v3
-        with:
-          name: spring-boot-app
-          path: build/libs/*.jar
+        uses: actions/upload-artifact@v3.1.3
 
       - name: 🚀 Deploy to Heroku
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
