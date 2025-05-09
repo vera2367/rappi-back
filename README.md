@@ -4,7 +4,7 @@ Este repositorio contiene una API REST desarrollada con Spring Boot y Gradle, co
 
 ---
 
-## 🧩 Tecnologías utilizada
+## 🧩 Tecnologías utilizadas
 
 - **Spring Boot + Gradle**
 - **MySQL** (para entorno de pruebas)
