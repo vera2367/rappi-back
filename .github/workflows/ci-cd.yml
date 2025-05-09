@@ -15,9 +15,9 @@ jobs:
         image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: testdb
-          MYSQL_USER: springuser
-          MYSQL_PASSWORD: springpass
+          MYSQL_DATABASE: soylucas
+          MYSQL_USER: root
+          MYSQL_PASSWORD: soylucas
         ports:
           - 3306:3306
         options: >-
@@ -33,7 +33,7 @@ jobs:
       - name: ☕ Setup Java
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'temurin'
 
       - name: 🛠️ Build with Gradle (sin tests)
