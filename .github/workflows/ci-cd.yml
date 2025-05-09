@@ -55,8 +55,8 @@ jobs:
 
       - name: 🧪 Run Postman tests
         run: |
-          newman run postman/MetodoPago Copy 2.postman_collection.json \
-            --environment postman/apirappi.postman_environment.json \
+          newman run postman2/MetodoPago Copy 2.postman_collection.json \
+            --environment postman2/apirappi.postman_environment.json \
             --reporters cli,junit \
             --reporter-junit-export newman-report.xml
 
