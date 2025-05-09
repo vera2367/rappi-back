@@ -39,11 +39,25 @@ jobs:
       - name: 🛠️ Build with Gradle (sin tests)
         run: ./gradlew build -x test
 
+      - name: 🕐 Esperar que MySQL esté listo
+        run: |
+          until mysql -h 127.0.0.1 -u root -p${{ secrets.MYSQL_PASSWORD }} -e 'show databases'; do
+            echo "Esperando MySQL..."
+            sleep 5
+          done
+
       - name: ▶️ Run Spring Boot app in background
         run: |
           nohup java -Dserver.port=8080 -jar build/libs/*.jar > output.log 2>&1 &
           echo $! > app.pid
           sleep 20
+
+      - name: Verificar si Spring Boot está levantado
+        run: |
+          until curl -s http://localhost:8080/actuator/health; do
+            echo "Esperando que la aplicación esté lista..."
+            sleep 5
+          done
 
       - name: 🧰 Setup Node.js (for Newman)
         uses: actions/setup-node@v3
@@ -65,6 +79,7 @@ jobs:
           kill $(cat app.pid)
 
       - name: 📂 Upload JAR as artifact
+        if: success()  # Solo sube si todo fue exitoso
         uses: actions/upload-artifact@v3
         with:
           name: spring-boot-app
